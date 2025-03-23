@@ -1,20 +1,17 @@
 const router = require('express').Router();
+const sessionRouter = require('./session.js');
+const usersRouter = require('./users.js');
+const { restoreUser } = require('../../utils/auth.js');
 
+router.use(restoreUser);  //make this connection before all others
+router.use('/session', sessionRouter);
+router.use('/users', usersRouter);
 
 // GET /api/restore-user
-// const { restoreUser } = require('../../utils/auth.js');
-
-// router.use(restoreUser);  //make this connection before all others
-
-// router.get(
-//   '/restore-user',
-//   (req, res) => {
+// router.get('/restore-user', (req, res) => {
 //     return res.json(req.user);
 //   }
 // );
-
-
-
 
 // GET /api/set-token-cookie
 // const { setTokenCookie } = require('../../utils/auth.js');
@@ -31,25 +28,18 @@ const router = require('express').Router();
 //   return res.json({ user: user });
 // });
 
-
-
-// GET /api/require-auth
+// // GET /api/require-auth
 // const { requireAuth } = require('../../utils/auth.js');
-// router.get(
-//   '/require-auth',
-//   requireAuth,
-//   (req, res) => {
+// router.get('/require-auth', requireAuth, (req, res) => {
 //     return res.json(req.user);
 //   }
 // );
 
 
-
-
-
-// router.post('/test', function(req, res) {
-//   res.json({ requestBody: req.body });
-// });
+//Post test
+router.post('/test', (req, res) => {
+  res.json({ requestBody: req.body });
+});
 
 
 
