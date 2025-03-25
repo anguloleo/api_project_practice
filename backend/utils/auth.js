@@ -10,6 +10,7 @@ const { secret, expiresIn } = jwtConfig;
 
 
 // SET TOKEN COOKIE function
+//set when signing up or logging in
 const setTokenCookie = (res, user) => {
     
     // Create the token.
