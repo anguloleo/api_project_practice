@@ -2,12 +2,14 @@ const router = require('express').Router();
 const sessionRouter = require('./session.js');
 const usersRouter = require('./users.js');
 const spotsRouter = require('./spots.js');
+const bookingsRouter = require('./bookings.js');
 const { restoreUser } = require('../../utils/auth.js');
 
 router.use(restoreUser);  //make this connection before all others
 router.use('/session', sessionRouter);
 router.use('/users', usersRouter);
 router.use('/spots', spotsRouter);
+router.use('/bookings', bookingsRouter);
 
 // GET /api/restore-user
 // router.get('/restore-user', (req, res) => {

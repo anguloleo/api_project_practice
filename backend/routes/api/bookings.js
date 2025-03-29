@@ -1,83 +1,122 @@
 const express = require('express')
 const bcrypt = require('bcryptjs');
-const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { Booking } = require('../../db/models');
+const { requireAuth } = require('../../utils/auth');
+const { Booking, Spot, User } = require('../../db/models');
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
 const { route } = require('./session');
 
 const router = express.Router();
 
-//Validate Spot inputs
-const validateSpot = [
-  check('ownerId')
+//Validate Spot inputs FIX
+const validateBooking = [
+  check('spotId')
   .exists({ checkFalsy: true})
-  .withMessage('Please provide a valid owner ID.'),
-  check('address')
+  .withMessage('Please provide a valid spot ID.'),
+  check('userId')
   .exists({ checkFalsy: true})
-  .withMessage('Please provide a valid address.'),
-  check('city')
+  .withMessage('Please provide a valid user ID.'),
+  check('startDate')
     .exists({ checkFalsy: true })
-    .withMessage('Please provide a valid city.'),
-  check('state')
+    .withMessage('Please provide a valid start date.'),
+  check('endDate')
     .exists({ checkFalsy: true })
-    .isLength({ max: 2 })
-    .withMessage('Please provide the state abbreviation.'),
-  check('country')
-  .exists({ checkFalsy: true })
-    .withMessage('Please provide a country.'),
-  check('lat')
-    .exists({ checkFalsy: true })
-    .withMessage('Please provide a latitude.'),
-    check('lng')
-  .exists({ checkFalsy: true})
-  .withMessage('Please provide a longitude.'),
-  check('name')
-  .exists({ checkFalsy: true})
-  .withMessage('Please provide a name for this spot.'),
-  check('description')
-  .exists({ checkFalsy: true})
-  .withMessage('Please provide a description.'),
-  check('price')
-  .exists({ checkFalsy: true})
-  .withMessage('Please provide a price.'),
+    .withMessage('Please provide a valid end date.'),
+
   handleValidationErrors
 ];
 
-// Get all spots route 
+// Get all bookings 
 router.get('/', async (req, res) => {
-    const spots = await Spot.findAll();
+    const bookings = await Booking.findAll();
       return res.json({
-        spots
+        bookings
       });
     }
   );
 
-  //Create a spot route
-router.post('/', validateSpot, requireAuth, async (req, res) => {
-      const { ownerId, address, city, state, country, lat, lng, name, description, price  } = req.body;
-      
-      const spot = await Spot.create({ ownerId, address, city, state, country, lat, lng, name, description, price });
-  
-  
-      return res.status(201).json({
-        spot
-      });
-    }
-  );
 
- // Get all spots from current user route 
-router.get('/userspots', requireAuth, async (req, res) => {
+
+  // Get all bookings for a Spot 
+router.get('/spotbookings/:id', requireAuth, async (req, res) =>{
+  const { user } = req;
+
+  //Find Spot's owner
+  const spot = await Spot.findByPk(req.params.id);
+
+    // If the spot does not exist, return a 404 error
+    if (!spot) {
+      return res.status(404).json({ message: "Spot not found" });
+    }
+
+  //If logged in user is the spot owner
+    const ownerBookings = await Booking.findAll({
+      where: {
+        spotId: req.params.id
+      },
+      include: {
+        model: User,
+        attributes: [
+            'id',
+            'firstName',
+            'lastName'
+        ]
+    }
+    });
+  
+    //if logged in user is NOT owner of spot
+      const bookings = await Booking.findAll({
+        attributes: ['spotId', 'userId', 'startDate', 'endDate'],
+        where: {
+          spotId: req.params.id
+        }
+      });
+
+if(spot.ownerId === user.id){
+  return res.json({
+    ownerBookings
+  });
+};
+if(spot.ownerId !== user.id){
+  return res.json({
+    bookings
+  });
+};
+
+}
+);
+
+
+
+ // Get all bookings from current user 
+router.get('/userbookings', requireAuth, async (req, res) => {
 
   const { user } = req;
 
-  const spots = await Spot.findAll({
+  const bookings = await Booking.findAll({
     where: {
-      ownerId: user.id
+      userId: user.id
+    },
+    include: {
+        model: Spot,
+        attributes: [
+            'id',
+            'ownerId',
+            'address',
+            'city',
+            'state',
+            'country',
+            'lat',
+            'lng',
+            'name',
+            'price',
+            'previewImage'
+        ]
     }
   });
+  
     return res.json({
-      spots
+      bookings
     });
   }
 );

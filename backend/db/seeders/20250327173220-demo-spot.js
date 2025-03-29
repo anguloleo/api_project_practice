@@ -4,7 +4,7 @@ const { Spot } = require('../models');
 
 let options = {};
 if (process.env.NODE_ENV === 'production') {
-  options.schema = process.env.SCHEMA;  // define your schema in options object
+  options.schema = process.env.SCHEMA;  
 }
 
 module.exports = {
@@ -39,7 +39,7 @@ module.exports = {
             avgRating: 4.5
           },
           {
-            ownerId: 3,
+            ownerId: 2,
             address: '9678 Arrowhead Rd',
             city: 'Big Bear',
             state: 'CA',

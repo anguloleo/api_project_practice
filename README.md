@@ -88,10 +88,10 @@ Returns the information about the current user that is logged in.
 Logs in a current user with valid credentials and returns the current user's
 information.
 
-* Require Authentication: false
+* Require Authentication: TRUE
 * Request
-  * Method: ?
-  * Route path: ?
+  * Method: POST
+  * Route path: 8000/api/session
   * Headers:
     * Content-Type: application/json
   * Body:
