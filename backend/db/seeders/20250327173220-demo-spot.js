@@ -39,7 +39,7 @@ module.exports = {
             avgRating: 4.5
           },
           {
-            ownerId: 2,
+            ownerId: 3,
             address: '9678 Arrowhead Rd',
             city: 'Big Bear',
             state: 'CA',

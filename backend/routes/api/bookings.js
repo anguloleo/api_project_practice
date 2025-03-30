@@ -185,9 +185,8 @@ router.patch('/:bookingId', requireAuth, validateBooking, async (req, res) => {
   }
 
   //Only the owner of the booking is authorized to edit
-  const spot = await Spot.findByPk(spotId);  //get spot info
-  if (user.id !== spot.ownerId) {
-    return res.status(403).json({ message: "Only owner of spot may edit booking." });
+  if (user.id !== booking.userId) {
+    return res.status(403).json({ message: "Only the owner of the booking is authorized to edit." });
   }
 
   // Check if the booking's end date has already passed
@@ -222,6 +221,44 @@ router.patch('/:bookingId', requireAuth, validateBooking, async (req, res) => {
   
     return res.status(200).json({
       updatedBooking
+    });
+  }
+);
+
+
+// DELETE A BOOKING
+router.delete('/:bookingId', requireAuth, async (req, res) => {
+
+  const { user } = req;
+
+  //Get booking
+  const booking = await Booking.findByPk(req.params.bookingId);
+
+  // If the booking does not exist, return a 404 error
+  if (!booking) {
+    return res.status(404).json({ message: "Booking not found." });
+  }
+
+  //Get spot 
+  const spot = await Spot.findByPk(booking.spotId);
+
+  //Only the owner of booking or spot is authorized to delete
+  if (!(user.id === spot.ownerId || user.id === booking.userId)) {
+    return res.status(403).json({ message: "Only authorized user allowed to delete booking." });
+  }
+
+
+  // Only delete future bookings
+  const currentDate = new Date();
+  if (new Date(booking.startDate) < currentDate) {
+    return res.status(400).json({ message: "Cannot delete a booking that has already started or passed." });
+  }
+
+  //Delete the new booking
+   await booking.destroy();
+  
+    return res.status(200).json({
+      message: "Booking successfully deleted"
     });
   }
 );
